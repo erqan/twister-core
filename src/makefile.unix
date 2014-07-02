@@ -42,7 +42,8 @@ LIBS += \
    -l db_cxx$(BDB_LIB_SUFFIX) \
    -l ssl \
    -l crypto \
-   -l rt
+   -l rt \
+   `pkg-config --libs dbus-1`
 
 TESTLIBS += \
  -Wl,-B$(LMODE) \
@@ -106,7 +107,7 @@ DEBUGFLAGS=-g
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
 xCXXFLAGS=-O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
-    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS)
+    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS) `pkg-config --cflags dbus-1`
 
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
@@ -152,6 +153,7 @@ OBJS= \
     obj/chainparams.o \
     obj/dhtproxy.o \
     obj/twister.o \
+    obj/twister-dbus.o \
     obj/twister_rss.o \
     obj/twister_utils.o
 

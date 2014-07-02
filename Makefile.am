@@ -120,6 +120,10 @@ if USE_SSE2
 SSE2_SOURCES = src/scrypt-sse2.cpp
 endif
 
+if USE_DBUS
+DBUS_SOURCES = src/twister-dbus.cpp
+endif
+
 BITCOIN_TWISTER_SOURCES = \
     src/alert.cpp \
     src/version.cpp \
@@ -160,6 +164,7 @@ BITCOIN_TWISTER_SOURCES = \
     src/twister.cpp \
     src/twister_rss.cpp \
     src/twister_utils.cpp \
+    $(DBUS_SOURCES) \
     $(SSE2_SOURCES)
 
 if USE_UPNP

@@ -17,6 +17,10 @@
 #include "softcheckpoint.h"
 #include "twister.h"
 
+#ifdef USE_DBUS
+#include "twister-dbus.h"
+#endif // USE_DBUS
+
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 #include <boost/filesystem/convenience.hpp>
@@ -1007,6 +1011,11 @@ bool AppInit2(boost::thread_group& threadGroup)
 
     // Start libtorrent + dht
     startSessionTorrent(threadGroup);
+
+#ifdef USE_DBUS
+    if (GetBoolArg("-dbus", false))
+        threadGroup.create_thread(boost::bind(&DBusThread));
+#endif // USE_DBUS
 
     return !fRequestShutdown;
 }

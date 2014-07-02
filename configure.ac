@@ -324,6 +324,15 @@ AC_ARG_WITH(
   [[ARG_WITH_LIBICONV=no]]
 )
 
+AC_ARG_ENABLE(
+  [dbus],
+  [AS_HELP_STRING(
+    [--enable-dbus],
+    [enable dbus connectivity [default=no]])],
+  [[ARG_ENABLE_DBUS=$enableval]],
+  [[ARG_ENABLE_DBUS=no]]
+)
+
 ###############################################################################
 # Checking configure options
 ###############################################################################
@@ -535,6 +544,21 @@ AS_CASE(["$ARG_ENABLE_POOL_ALLOC"],
    AC_MSG_ERROR([Unknown option "$ARG_ENABLE_POOL_ALLOC". Use either "yes" or "no".])]
 )
 
+AC_MSG_CHECKING([whether dbus connectivity should be enabled])
+AS_CASE(["$ARG_ENABLE_DBUS"],
+  ["yes"|"on"], [
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USE_DBUS],[1],[Enable DBUS])
+      CXXFLAGS="$CXXFLAGS -DUSE_DBUS `$PKG_CONFIG --cflags dbus-1` "
+      LIBS="$LIBS `$PKG_CONFIG --libs dbus-1` "
+    ],
+  ["no"|"off"], [
+      AC_MSG_RESULT([no])
+    ],
+   [AC_MSG_RESULT([$ARG_ENABLE_DBUS])
+    AC_MSG_ERROR([Unknown option "$ARG_ENABLE_DBUS". Use either "yes" or "no".])]
+)
+
 AS_ECHO
 AS_ECHO "Checking for extra build files:"
 
@@ -653,6 +677,7 @@ AM_CONDITIONAL([WITH_SHIPPED_GEOIP], [test "x$ARG_WITH_LIBGEOIP" = "xno" ])
 AM_CONDITIONAL([WITH_OPENSSL], [test "x$ARG_ENABLE_ENCRYPTION" = "xyes" -o "x$ARG_ENABLE_ENCRYPTION" = "xon" ])
 AM_CONDITIONAL([USE_SSE2], [test "x$ARG_ENABLE_SSE2" = "xyes" -o "x$ARG_ENABLE_SSE2" = "xon" ])
 AM_CONDITIONAL([USE_UPNP], [test "x$ARG_ENABLE_UPNP" = "xyes" -o "x$ARG_ENABLE_UPNP" = "xon" ])
+AM_CONDITIONAL([USE_DBUS], [test "x$ARG_ENABLE_DBUS" = "xyes" -o "x$ARG_ENABLE_DBUS" = "xon" ])
 
 ###############################################################################
 # Other useful stuff
@@ -755,6 +780,7 @@ Features:
   geoip support:        ${ARG_ENABLE_GEOIP:-yes}
   dht support:          ${ARG_ENABLE_DHT:-yes}
   pool allocators:      ${ARG_ENABLE_POOL_ALLOC:-yes}
+  dbus connectivity:    ${ARG_ENABLE_DBUS:-no}
 
 Extra builds:
   examples:             ${ARG_ENABLE_EXAMPLES:-no}
