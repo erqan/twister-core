@@ -754,7 +754,6 @@ DBusMessageIter *tw_dbus_fill_args(Value &ret, DBusMessageIter *args, bool isVar
         }
 
         dbus_bool_t val = ret.get_bool();
-        fprintf(stdout, "%ld \n", val);
         if (!dbus_message_iter_append_basic(args, DBUS_TYPE_BOOLEAN, &val))
         {
             fprintf(stderr, "Out Of Memory!\n");

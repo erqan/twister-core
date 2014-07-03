@@ -28,6 +28,8 @@ Please follow the instructions for your platform:
 - [Mac OS X](https://github.com/miguelfreitas/twister-core/blob/master/doc/build-osx.md)
 - [Windows (untested)](https://github.com/miguelfreitas/twister-core/wiki/Compiling-for-Windows)
 
+- [to build and use with DBUS](https://github.com/miguelfreitas/twister-core/blob/master/doc/build-n-use-with-dbus.md)
+
 Or, alternatively, you can build Twister on an isolated Linux container, using
 [docker](http://docker.io/):
 
