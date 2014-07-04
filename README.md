@@ -30,12 +30,15 @@ Please follow the instructions for your platform:
 
 - [to build and use with DBUS](https://github.com/erqan/twister-core/blob/twister-dbus/doc/build-n-use-with-dbus.md)
 
-Or, alternatively, you can build Twister on an isolated Linux container, using
-[docker](http://docker.io/):
+Or, alternatively, you can run Twister on an isolated Linux container, using [docker](http://docker.io/). Quickstart:
 
-    docker build -t twister https://raw.githubusercontent.com/miguelfreitas/twister-core/master/Dockerfile
-    docker run -d -p 127.0.0.1:1234:28332 twister
-    # now try to access http://127.0.0.1:1234/ on docker host
+    # Prepend "sudo -E" if you are not logged in as root
+    ./twister-on-docker run --remote
+
+The above command downloads and runs a [pre-built image](https://registry.hub.docker.com/u/miguelfreitas/twister) from the Docker index. You can also build and run your own container:
+
+    ./twister-on-docker build
+    ./twister-on-docker run
 
 > According to our tests, at least 1GB of RAM is needed to compile Twister.
 
