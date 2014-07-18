@@ -51,6 +51,82 @@ AS_ECHO "Initializing Libtool:"
 LT_PREREQ([2.2.6])
 LT_INIT
 
+# host checks from bitcoin's configure.ac
+case $host in
+  *mingw*)
+     TARGET_OS=windows
+     AC_CHECK_LIB([mingwthrd],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([kernel32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([user32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([gdi32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([comdlg32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([winspool],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([winmm],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([shell32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([comctl32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([ole32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([oleaut32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([uuid],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([rpcrt4],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([advapi32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([ws2_32],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([mswsock],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([shlwapi],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([iphlpapi],      [main],, AC_MSG_ERROR(lib missing))
+     AC_CHECK_LIB([crypt32],      [main],, AC_MSG_ERROR(lib missing))
+
+     CPPFLAGS="$CPPFLAGS -D_MT -DWIN32 -D_WINDOWS -DBOOST_THREAD_USE_LIB"
+     LEVELDB_TARGET_FLAGS="TARGET_OS=OS_WINDOWS_CROSSCOMPILE"
+     if test "x$CXXFLAGS_overridden" = "xno"; then
+       CXXFLAGS="$CXXFLAGS -w"
+     fi
+     case $host in
+       i?86-*) WINDOWS_BITS=32 ;;
+       x86_64-*) WINDOWS_BITS=64 ;;
+       *) AC_MSG_ERROR("Could not determine win32/win64 for installer") ;;
+     esac
+     AC_SUBST(WINDOWS_BITS)
+     ;;
+  *darwin*)
+     TARGET_OS=darwin
+     LEVELDB_TARGET_FLAGS="TARGET_OS=Darwin"
+     if  test x$cross_compiling != xyes; then
+       BUILD_OS=darwin
+       AC_CHECK_PROG([PORT],port, port)
+       if test x$PORT = xport; then
+         dnl add default macports paths
+         CPPFLAGS="$CPPFLAGS -isystem /opt/local/include -I/opt/local/include/db48"
+         LIBS="$LIBS -L/opt/local/lib -L/opt/local/lib/db48"
+       fi
+
+       AC_CHECK_PROG([BREW],brew, brew)
+       if test x$BREW = xbrew; then
+         dnl add default homebrew paths
+         openssl_prefix=`$BREW --prefix openssl`
+         bdb_prefix=`$BREW --prefix berkeley-db4`
+         export PKG_CONFIG_PATH="$openssl_prefix/lib/pkgconfig:$PKG_CONFIG_PATH"
+         CPPFLAGS="$CPPFLAGS -I$bdb_prefix/include"
+         LIBS="$LIBS -L$bdb_prefix/lib"
+       fi
+     else
+       case $build_os in
+         *darwin*)
+           BUILD_OS=darwin
+           ;;
+         *)
+           AC_PATH_TOOL([INSTALLNAMETOOL], [install_name_tool], install_name_tool)
+           AC_PATH_TOOL([OTOOL], [otool], otool)
+           AC_PATH_PROGS([GENISOIMAGE], [genisoimage mkisofs],genisoimage)
+           ;;
+       esac
+     fi
+
+     CPPFLAGS="$CPPFLAGS -DMAC_OSX"
+     ;;
+   *)
+     ;;
+esac
+
 
 ###############################################################################
 # Checking for needed base libraries
@@ -127,7 +203,7 @@ AC_CHECK_FUNCS([gethostbyname], [],
       [AC_CHECK_LIB([socket], [gethostbyname], [],
         [AC_CHECK_LIB([ws2_32], [main],
           [AC_CHECK_LIB([wsock32], [main],
-            [LIBS="-lws2_32 -lwsock32 $LIBS"],
+            [LIBS="-lws2_32 -lwsock32 -lgdi32 -lcrypt32 $LIBS"],
             [AC_MSG_ERROR([wsock32 function not found.])])],
           [AC_MSG_ERROR([gethostbyname function not found.])])])])])]
 )
@@ -464,7 +540,7 @@ AS_CASE(["$ARG_ENABLE_SSE2"],
   ["yes"|"on"], [
       AC_MSG_RESULT([yes])
       AC_DEFINE([USE_SSE2],[1],[Enable SSE2])
-      CXXFLAGS="$CXXFLAGS -DUSE_SSE2 -msse2 "
+      CXXFLAGS="$CXXFLAGS -DUSE_SSE2 -msse2 -mstackrealign "
     ],
   ["no"|"off"], [
       AC_MSG_RESULT([no])
@@ -684,6 +760,7 @@ AS_IF([test "x$enable_shared" = "xyes"],
 AC_SUBST(DEBUGFLAGS)
 AC_SUBST(PYTHON_INSTALL_PARAMS)
 AC_SUBST(COMPILETIME_OPTIONS)
+AC_SUBST(LEVELDB_TARGET_FLAGS)
 
 
 # Try to guess real svn revision if any, fallback to hardcoded otherwise
