@@ -1090,10 +1090,15 @@ bool processReceivedDM(lazy_entry const* post)
                         lazy_entry v;
                         int pos;
                         libtorrent::error_code ec;
-                        if (lazy_bdecode(textOut.data(), textOut.data()+textOut.size(), v, ec, &pos) == 0) {
-                            msg = v.dict_find_string_value("msg");
-                            to = v.dict_find_string_value("to");
-                            // new features here: key distribution etc
+                        if (lazy_bdecode(textOut.data(), textOut.data()+textOut.size(), v, ec, &pos) == 0
+                                && v.type() == lazy_entry::dict_t) {
+                            lazy_entry const* pMsg = v.dict_find_string("msg");
+                            lazy_entry const* pTo  = v.dict_find_string("to");
+                            if (pMsg && pTo) {
+                                msg = pMsg->string_value();
+                                to  = pTo->string_value();
+                                // new features here: key distribution etc
+                            }
                         }
                     }
 
@@ -2494,9 +2499,7 @@ TextSearch::TextSearch(string const &keyword, entry const &params) :
     }
 
     entry const *pCase = params.find_key("case");
-    if( pCase && pCase->type() == entry::string_t && pCase->string() == "insensitive" ) {
-        caseInsensitive = true;
-    }
+    caseInsensitive = pCase && pCase->type() == entry::string_t && pCase->string() == "insensitive";
 
     int64_t now = GetAdjustedTime();
 
