@@ -233,6 +233,7 @@ static const CRPCCommand vRPCCommands[] =
     { "listsinceblock",         &listsinceblock,         false,     false,      false },
     { "dumpprivkey",            &dumpprivkey,            true,      false,      false },
     { "dumppubkey",             &dumppubkey,             false,     false,      false },
+    { "testvector",             &testvector,             false,     false,      false },
     { "dumpwallet",             &dumpwallet,             true,      false,      false },
     { "importprivkey",          &importprivkey,          false,     false,      false },
     { "importwallet",           &importwallet,           false,     false,      false },
@@ -245,14 +246,21 @@ static const CRPCCommand vRPCCommands[] =
     { "getlastsoftcheckpoint",  &getlastsoftcheckpoint,  true,      false,      false },
     // twister dht network
     { "dhtput",                 &dhtput,                 false,     true,       false },
+    { "dhtputraw",              &dhtputraw,              false,     true,       true },
     { "dhtget",                 &dhtget,                 false,     true,       true },
     { "newpostmsg",             &newpostmsg,             false,     true,       false },
+    { "newpostraw",             &newpostraw,             false,     true,       true },
     { "newdirectmsg",           &newdirectmsg,           false,     true,       false },
     { "newrtmsg",               &newrtmsg,               false,     true,       false },
+    { "newfavmsg",              &newfavmsg,              false,     true,       false },
     { "getposts",               &getposts,               false,     true,       false },
     { "getdirectmsgs",          &getdirectmsgs,          false,     true,       false },
+    { "getmentions",            &getmentions,            false,     true,       false },
+    { "getfavs",                &getfavs,                false,     true,       false },
     { "setspammsg",             &setspammsg,             false,     false,      false },
     { "getspammsg",             &getspammsg,             false,     false,      false },
+    { "setpreferredspamlang",   &setpreferredspamlang,   false,     false,      false },
+    { "getpreferredspamlang",   &getpreferredspamlang,   false,     false,      false },
     { "follow",                 &follow,                 false,     true,       false },
     { "unfollow",               &unfollow,               false,     true,       false },
     { "getfollowing",           &getfollowing,           false,     true,       false },
@@ -265,6 +273,14 @@ static const CRPCCommand vRPCCommands[] =
     { "getspamposts",           &getspamposts,           false,     true,       false },
     { "torrentstatus",          &torrentstatus,          false,     true,       false },
     { "search",                 &search,                 false,     true,       false },
+    { "creategroup",            &creategroup,            false,     true,       false },
+    { "listgroups",             &listgroups,             false,     true,       false },
+    { "getgroupinfo",           &getgroupinfo,           false,     true,       false },
+    { "newgroupinvite",         &newgroupinvite,         false,     true,       false },
+    { "newgroupdescription",    &newgroupdescription,    false,     true,       false },
+    { "leavegroup",             &leavegroup,             false,     true,       false },
+    { "getpieceavailability",   &getpieceavailability,   false,     true,       true },
+    { "getpiecemaxseen",        &getpiecemaxseen,        false,     true,       true },
 };
 
 CRPCTable::CRPCTable()
@@ -361,6 +377,7 @@ static string HTTPReply(int nStatus, const string& strMsg, bool keepalive, const
             "Connection: %s\r\n"
             "Content-Length: %"PRIszu"\r\n"
             "Content-Type: %s\r\n"
+            "Content-Security-Policy: script-src 'self' 'unsafe-eval'\r\n"
             "Server: bitcoin-json-rpc/%s\r\n"
             "\r\n",
         nStatus,
@@ -965,7 +982,7 @@ static string JSONRPCExecBatch(const Array& vReq)
 void ServiceConnection(AcceptedConnection *conn)
 {
     bool fRun = true;
-    while (fRun)
+    while (fRun && !ShutdownRequested())
     {
         int nProto = 0;
         map<string, string> mapHeaders;
@@ -997,6 +1014,9 @@ void ServiceConnection(AcceptedConnection *conn)
             break;
         }
 
+        if (mapHeaders["connection"] == "close")
+            fRun = false;
+        
         if(strMethod == "GET" && strURI == "/")
             strURI="/home.html";
 
@@ -1037,9 +1057,6 @@ void ServiceConnection(AcceptedConnection *conn)
             continue;
         }
 
-        if (mapHeaders["connection"] == "close")
-            fRun = false;
-        
         if(strMethod == "GET" && strURI.substr(0, 4) == "/rss" && !GetBoolArg("-public_server_mode",false))
         {
             string rssOutput;
@@ -1299,15 +1316,25 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "dhtget"                 && n > 5) ConvertTo<boost::int64_t>(params[5]);
     if (strMethod == "newpostmsg"             && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "newpostmsg"             && n > 4) ConvertTo<boost::int64_t>(params[4]);
+    if (strMethod == "newpostraw"             && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "newdirectmsg"           && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "newdirectmsg"           && n > 4) ConvertTo<bool>(params[4]);
     if (strMethod == "newrtmsg"               && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "newrtmsg"               && n > 2) ConvertTo<Object>(params[2]);
+    if (strMethod == "newfavmsg"              && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "newfavmsg"              && n > 2) ConvertTo<Object>(params[2]);
+    if (strMethod == "newfavmsg"              && n > 3) ConvertTo<bool>(params[3]);
+    if (strMethod == "getlasthave"            && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "getposts"               && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "getposts"               && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "getposts"               && n > 2) ConvertTo<boost::int64_t>(params[2]);
+    if (strMethod == "getposts"               && n > 3) ConvertTo<boost::int64_t>(params[3]);
     if (strMethod == "getdirectmsgs"          && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getdirectmsgs"          && n > 2) ConvertTo<Array>(params[2]);
+    if (strMethod == "getmentions"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getmentions"            && n > 2) ConvertTo<Object>(params[2]);
+    if (strMethod == "getfavs"                && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getfavs"                && n > 2) ConvertTo<Object>(params[2]);
     if (strMethod == "follow"                 && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "unfollow"               && n > 1) ConvertTo<Array>(params[1]);
     if (strMethod == "listusernamespartial"   && n > 1) ConvertTo<boost::int64_t>(params[1]);
@@ -1317,6 +1344,11 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "getspamposts"           && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "getspamposts"           && n > 2) ConvertTo<boost::int64_t>(params[2]);
     if (strMethod == "search"                 && n > 2) ConvertTo<boost::int64_t>(params[2]);
+    if (strMethod == "newgroupinvite"         && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "newgroupinvite"         && n > 3) ConvertTo<Array>(params[3]);
+    if (strMethod == "newgroupdescription"    && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getpieceavailability"   && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getpiecemaxseen"        && n > 1) ConvertTo<boost::int64_t>(params[1]);
 
     return params;
 }
