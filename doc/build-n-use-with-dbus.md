@@ -23,7 +23,7 @@ For example;
 
 ## To Test
 
--There is no dbus client yet to test properly-. It can be tested with `twisterd` command line util or with `dbus-send`.
+~~There is no dbus client yet to test properly~~. It can be tested with `twisterd` command line util or with `dbus-send`.
 With `twisterd`, all you need is adding `-dbus` parametre to your command.
 
 All rpc command can be used.
@@ -40,7 +40,7 @@ For example;
 
 ## DBUS Map
 
-=Paths=
+####Paths
 
     /
     /twister
@@ -49,13 +49,13 @@ For example;
     /twister/users/[wallet_users_1]
     /twister/users/[wallet_users_2]
 
-=Interfaces=
+####Interfaces
 
     twister.core
     twister.dht
     twister.users
 
-=Methods=
+####Methods
 
     twister.core.help                   on /twister
     twister.core.stop                   on /twister
