@@ -15,6 +15,10 @@
 #include "twister_utils.h"
 #include "twister_rss.h"
 
+#ifdef USE_DBUS
+#include "twister-dbus.h"
+#endif // USE_DBUS
+
 #include <boost/algorithm/string.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ip/v6_only.hpp>
@@ -1376,7 +1380,13 @@ int CommandLineRPC(int argc, char *argv[])
         Array params = RPCConvertValues(strMethod, strParams);
 
         // Execute
-        Object reply = CallRPC(strMethod, params);
+        Object reply;
+#ifdef USE_DBUS
+        if (GetBoolArg("-dbus", false))
+            reply = tw_dbus_call(strMethod.c_str(), params);
+        else
+#endif // USE_DBUS
+            reply = CallRPC(strMethod, params);
 
         // Parse reply
         const Value& result = find_value(reply, "result");

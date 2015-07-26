@@ -254,6 +254,11 @@ std::string HelpMessage()
     strUsage += "  -loadblock=<file>      " + _("Imports blocks from external blk000??.dat file") + "\n";
     strUsage += "  -reindex               " + _("Rebuild block chain index from current blk000??.dat files") + "\n";
     strUsage += "  -par=<n>               " + _("Set the number of script verification threads (up to 16, 0 = auto, <0 = leave that many cores free, default: 0)") + "\n";
+#ifdef USE_DBUS
+    strUsage += "  -dbus                  " + _("Activate DBUS interface, (default: 0)") + "\n";
+    strUsage += "  -dbus-system           " + _("Start DBUS on system bus, (default: 1) (To use on system bus with non-root user, you need to install share/co.net.twister.conf to /etc/dbus-1/system.d)") + "\n";
+    strUsage += "  -dbus-name=<name>      " + _("DBUS name, (default: co.net.twister)") + "\n";
+#endif // USE_DBUS
 
     strUsage += "\n"; _("Block creation options:") + "\n";
     strUsage += "  -blockminsize=<n>      "   + _("Set minimum block size in bytes (default: 0)") + "\n";
