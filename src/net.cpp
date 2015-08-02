@@ -77,6 +77,8 @@ CCriticalSection cs_setservAddNodeAddresses;
 vector<std::string> vAddedNodes;
 CCriticalSection cs_vAddedNodes;
 
+int portUsedLastTime = 0;
+
 static CSemaphore *semOutbound = NULL;
 
 // Signals for message handling
@@ -91,7 +93,14 @@ void AddOneShot(string strDest)
 
 unsigned short GetListenPort()
 {
-    return (unsigned short)(GetArg("-port", Params().GetDefaultPort()));
+    int64 portFromArg = GetArg("-port", 0);
+    if( portFromArg )
+        return (unsigned short)portFromArg;
+    if( !portUsedLastTime ) {
+        //portUsedLastTime = Params().GetDefaultPort();
+        portUsedLastTime = 1024 + GetRand(30000);
+    }
+    return (unsigned short)portUsedLastTime;
 }
 
 // find 'best' local address for a particular peer
@@ -1218,6 +1227,29 @@ void _ThreadDNSAddressSeed(const char *strDNS)
                     addr.nTime = GetTime() - 3*nOneDay - GetRand(4*nOneDay); // use a random age between 3 and 7 days old
                     vAdd.push_back(addr);
                     found++;
+                }
+                
+                // non std ports hack: see twister-seeder
+                string nonStdHost = "nonstd." + seed.host;
+                if (LookupHost(nonStdHost.c_str(), vIPs))
+                {
+                    BOOST_FOREACH(CNetAddr& ip, vIPs)
+                    {
+                        unsigned short crcAddr = ip.crc16();
+                        
+                        BOOST_FOREACH(CNetAddr& ipPort, vIPs)
+                        {
+                            if( ipPort.GetByte(3) == (crcAddr >> 8) &&
+                                ipPort.GetByte(2) == (crcAddr & 0xff) ) {
+                                int port = (ipPort.GetByte(1) << 8) + ipPort.GetByte(0);
+                                int nOneDay = 24*3600;
+                                CAddress addr = CAddress(CService(ip, port));
+                                addr.nTime = GetTime() - 3*nOneDay - GetRand(4*nOneDay); // use a random age between 3 and 7 days old
+                                vAdd.push_back(addr);
+                                found++;
+                            }
+                        }
+                    }
                 }
             }
             addrman.Add(vAdd, CNetAddr(seed.name, true));
