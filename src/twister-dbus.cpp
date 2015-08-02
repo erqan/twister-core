@@ -1423,6 +1423,17 @@ Object tw_dbus_call(const char *method, Array& params)
     {
         tw_dbus_call_map_g[tw_dbus_methodes_g[i]] = &tw_dbus_call_permissions_g[i];
     }
+
+    if (!tw_dbus_call_map_g.count(method))
+    {
+        Object ret;
+        Object err;
+        err.push_back(Pair("code", -1));
+        err.push_back(Pair("message", "unknown method"));
+        ret.push_back(Pair("error", err));
+        return ret;
+    }
+
     string yol;
     if (tw_dbus_call_map_g[method]->permissions[TW_DBUS_RPID_ROOT])
         yol = TW_DBUS_PATH_ROOT;
