@@ -7,6 +7,7 @@
 #include <dbus/dbus.h>
 
 #include "bitcoinrpc.h"
+#include "utf8core.h"
 
 using namespace json_spirit;
 using namespace std;
@@ -94,8 +95,16 @@ typedef enum TW_DBUS_METHODS
     TW_DBUS_M_TORRENTSTATUS,
     TW_DBUS_M_SEARCH,
     TW_DBUS_M_LISTPERMISSIONS,
-    TW_DBUS_M_CHECKOLDMENTIONS,
-    TW_DBUS_M_RESCANMENTIONS,
+    TW_DBUS_M_NEWFAVMSG,
+    TW_DBUS_M_GETFAVS,
+    TW_DBUS_M_CREATEGROUP,
+    TW_DBUS_M_LISTGROUPS,
+    TW_DBUS_M_GETGROUPINFO,
+    TW_DBUS_M_NEWGROUPINVITE,
+    TW_DBUS_M_NEWGROUPDESCRIPTION,
+    TW_DBUS_M_LEAVEGROUP,
+    TW_DBUS_M_GETPIECEAVAILABILITY,
+    TW_DBUS_M_GETPIECEMAXSEEN,
     TW_DBUS_M_CNT
 } TW_DBUS_METHODS;
 
@@ -195,8 +204,16 @@ string tw_dbus_methodes_g[] = {
     "torrentstatus",
     "search",
     "listpermissions",
-    "checkoldmentions",
-    "rescanmentions"
+    "newfavmsg",
+    "getfavs",
+    "creategroup",
+    "listgroups",
+    "getgroupinfo",
+    "newgroupinvite",
+    "newgroupdescription",
+    "leavegroup",
+    "getpieceavailability",
+    "getpiecemaxseen"
 };
 
 tw_dbus_calls_t tw_dbus_call_permissions_g[] = {
@@ -272,8 +289,16 @@ tw_dbus_calls_t tw_dbus_call_permissions_g[] = {
     {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_SEARCH],                   true,  {FALSE, TRUE, TRUE,  FALSE, FALSE}},
     //interface         method name                                             isRPC    root twister users  users/* dht
     {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_LISTPERMISSIONS],          false, {TRUE,  TRUE, FALSE, FALSE, FALSE}},
-    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_CHECKOLDMENTIONS],         true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
-    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_RESCANMENTIONS],           true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_NEWFAVMSG],                true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_GETFAVS],                  true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_CREATEGROUP],              true,  {FALSE, TRUE, FALSE, FALSE, FALSE}},
+    {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_LISTGROUPS],               true,  {FALSE, TRUE, FALSE, FALSE, FALSE}},
+    {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_GETGROUPINFO],             true,  {FALSE, TRUE, FALSE, FALSE, FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_NEWGROUPINVITE],           true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_NEWGROUPDESCRIPTION],      true,  {FALSE, TRUE, FALSE, FALSE, FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_LEAVEGROUP],               true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_GETPIECEAVAILABILITY],     true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_GETPIECEMAXSEEN],          true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
 };
 
 map<string, tw_dbus_calls_t *> tw_dbus_call_map_g;
@@ -857,7 +882,12 @@ DBusMessageIter *tw_dbus_extract_from_json(const Value &ret, DBusMessageIter *ar
             args = &p_variant;
         }
 
-        const char *val = ret.get_str().c_str();
+        string strVal = ret.get_str();
+        if (!utf8::is_valid(strVal.begin(), strVal.end()))
+            strVal = "";
+
+        const char *val = strVal.c_str();
+        fprintf(stdout, "%s \n", val);
         if (!dbus_message_iter_append_basic(args, DBUS_TYPE_STRING, &val))
         {
             fprintf(stderr, "Out Of Memory!\n");
