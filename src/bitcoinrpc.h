@@ -242,5 +242,6 @@ extern json_spirit::Value uidtousername(const json_spirit::Array& params, bool f
 extern json_spirit::Value usernametouid(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value newshorturl(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value decodeshorturl(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value config(const json_spirit::Array& params, bool fHelp);
 
 #endif

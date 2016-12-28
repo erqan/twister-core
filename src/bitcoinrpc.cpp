@@ -290,6 +290,7 @@ static const CRPCCommand vRPCCommands[] =
     { "uidtousername",          &uidtousername,          false,     true,       true },
     { "newshorturl",            &newshorturl,            false,     true,       false },
     { "decodeshorturl",         &decodeshorturl,         false,     true,       true },
+    { "config",                 &config,                 false,     true,       false }
 };
 
 CRPCTable::CRPCTable()
@@ -1025,7 +1026,7 @@ void ServiceConnection(AcceptedConnection *conn)
 
         if (mapHeaders["connection"] == "close")
             fRun = false;
-        
+
         if(strMethod == "GET" && strURI == "/")
             strURI="/home.html";
 
@@ -1145,7 +1146,7 @@ json_spirit::Value CRPCTable::execute(const std::string &strMethod, const json_s
     const CRPCCommand *pcmd = tableRPC[strMethod];
     if (!pcmd)
         throw JSONRPCError(RPC_METHOD_NOT_FOUND, "Method not found");
-    
+
     if(!pcmd->allowOnPublicServer && GetBoolArg("-public_server_mode",false))
         throw JSONRPCError(RPC_FORBIDDEN_ON_PUBLIC_SERVER, "Forbidden: accessing this method is not allowed on a public server");
 
