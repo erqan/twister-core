@@ -38,12 +38,16 @@ struct UserData {
     std::set<std::string> m_ignoreGroups;
 };
 
-
-class twister_utils
+namespace twister
 {
-public:
-    twister_utils();
-};
+    class utils
+    {
+    public:
+        utils();
+        
+        static void notification(std::string, std::string);
+    };
+}
 
 int load_file(std::string const& filename, std::vector<char>& v, int limit = 8000000);
 int save_file(std::string const& filename, std::vector<char>& v);

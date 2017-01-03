@@ -23,7 +23,7 @@ using namespace std;
 
 #include <time.h>
 
-twister::twister()
+twister::twister::twister()
 {
 }
 
@@ -1439,6 +1439,14 @@ bool processReceivedDM(lazy_entry const* post)
                         storeGroupDM(item.second.username, stoDM);
                     } else {
                         storeNewDM(item.second.username, fromMe ? to : from, stoDM);
+#ifdef USE_DBUS
+                        string notification = GetArg("-notification", "none");
+                        if (!fromMe && (notification == "all" || notification == "dm"))
+                        {
+                            string title = from + string(" sent a dm to ") + to;
+                            twister::utils::notification(title, msg);
+                        }
+#endif // USE_DBUS
                     }
                     break;
                 }
@@ -1481,6 +1489,17 @@ void processReceivedPost(lazy_entry const &v, std::string &username, int64 time,
                     entry vEntry;
                     vEntry = v;
                     m_users[mentionUser].m_mentionsPosts.push_back(vEntry);
+                    #ifdef USE_DBUS
+                    string notification = GetArg("-notification", "none");
+                    if (notification == "all" || notification == "mention")
+                    {
+                        entry upost = vEntry["userpost"];
+                        string title = upost["n"].string() + string(" mentioned ") + mentionUser;
+                        string body = upost["msg"].string();
+
+                        twister::utils::notification(title, body);
+                    }
+                    #endif // USE_DBUS
                 }
             }
         }

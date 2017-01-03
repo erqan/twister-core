@@ -10,11 +10,73 @@
 
 #include <stdio.h>
 
+#ifdef USE_DBUS
+#include <dbus/dbus.h>
+#endif // USE_DBUS
+
 using namespace std;
 using namespace boost;
 
-twister_utils::twister_utils()
+twister::utils::utils()
 {
+}
+
+void twister::utils::notification(std::string title, std::string body)
+{
+#ifdef USE_DBUS
+    DBusMessage* msg;
+    DBusMessageIter args, args2, args3;
+    DBusConnection* conn;
+    DBusError err;
+    static dbus_uint32_t serial = 0;
+
+    dbus_error_init(&err);
+
+    conn = dbus_bus_get(DBUS_BUS_SESSION, &err);
+    if (dbus_error_is_set(&err))
+    {
+        fprintf(stderr, "Connection Error (%s)\n", err.message);
+        dbus_error_free(&err);
+        return;
+    }
+
+    msg = dbus_message_new_method_call("org.freedesktop.Notifications",
+                   "/org/freedesktop/Notifications",
+                   "org.freedesktop.Notifications",
+                   "Notify");
+    if (NULL == msg)
+    {
+        fprintf(stderr, "Message Null\n");
+        return;
+    }
+
+    int intRid = 0;
+    int intTimeout = 10000;
+    const char *appName = "twisterd";
+    const char *notiSum = title.c_str();
+    const char *notiBody = body.c_str();
+    const char *icon = "twister";
+
+    dbus_message_iter_init_append(msg, &args);
+
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &appName); //app_name
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_UINT32, &intRid); //replaces_id
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &icon); //app_icon
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &notiSum); //summary
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_STRING, &notiBody); //body
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "s", &args2); //actions
+    dbus_message_iter_close_container(&args, &args2);
+    dbus_message_iter_open_container(&args, DBUS_TYPE_ARRAY, "{sv}", &args3); //hints
+    dbus_message_iter_close_container(&args, &args3);
+    dbus_message_iter_append_basic(&args, DBUS_TYPE_INT32, &intTimeout); //expire_timeout
+
+    dbus_connection_send(conn, msg, &serial);
+
+    dbus_message_unref(msg);
+    //dbus_connection_close(conn);
+#else
+    printf("Reconfigure with '--enable-dbus' and rebuild the twisterd to use notifications...");
+#endif
 }
 
 int load_file(std::string const& filename, std::vector<char>& v, int limit)
