@@ -21,6 +21,7 @@ using namespace std;
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <fstream>
 #include <time.h>
 
 twister::twister()
@@ -4432,7 +4433,7 @@ Value config(const Array& params, bool fHelp)
     if (strCommand == "list")
     {
         for (map<string, string>::iterator it = mapArgs.begin(); it != mapArgs.end(); ++it)
-            ret << it->first << " = " << it->second << endl;
+            ret << (it->first[0] == '-' ? it->first.substr(1) : it->first) << "=" << it->second << endl;
     }
     else if (strCommand == "show")
     {
@@ -4440,10 +4441,13 @@ Value config(const Array& params, bool fHelp)
             throw runtime_error("show command expects a key to show its value.");
 
         string strKey = params[1].get_str();
+        if (strKey[0] != '-')
+            strKey = string("-") + strKey;
+        
         if (mapArgs.count(strKey) == 0)
-            ret << strKey << " = <unset>" << endl;
+            ret << strKey.substr(1) << "=<unset>" << endl;
         else
-            ret << strKey << " = " << mapArgs[strKey] << endl;
+            ret << strKey.substr(1) << "=" << mapArgs[strKey] << endl;
     }
     else if (strCommand == "set")
     {
@@ -4453,8 +4457,26 @@ Value config(const Array& params, bool fHelp)
         string strKey = params[1].get_str();
         string strVal = params[2].get_str();
 
+        if (strKey[0] != '-')
+            strKey = string("-") + strKey;
+        
         mapArgs[strKey] = strVal;
-        ret << strKey << " = " << mapArgs[strKey] << endl;
+        ret << strKey.substr(1) << " = " << mapArgs[strKey] << endl;
+    }
+    else if (strCommand == "save")
+    {
+        fstream fs(GetConfigFile().c_str(), fstream::out | fstream::trunc);
+        if (fs.fail())
+            throw runtime_error("cannot open config file for writing..");
+        
+        for (map<string, string>::iterator it = mapArgs.begin(); it != mapArgs.end(); ++it)
+        {
+            string strKey = it->first[0] == '-' ? it->first.substr(1) : it->first;
+            fs << strKey << "=" << it->second << endl;
+        }
+        
+        fs.flush();
+        fs.close();
     }
 
     return ret.str();
