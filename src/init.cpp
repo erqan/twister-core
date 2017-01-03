@@ -263,6 +263,10 @@ std::string HelpMessage()
     strUsage += "  -rpcsslcertificatechainfile=<file.cert>  " + _("Server certificate file (default: server.cert)") + "\n";
     strUsage += "  -rpcsslprivatekeyfile=<file.pem>         " + _("Server private key (default: server.pem)") + "\n";
     strUsage += "  -rpcsslciphers=<ciphers>                 " + _("Acceptable ciphers (default: TLSv1+HIGH:!SSLv2:!aNULL:!eNULL:!AH:!3DES:@STRENGTH)") + "\n";
+    
+    #ifdef USE_DBUS
+    strUsage += "  -notification=<all|mention|dm>   " + _("Shows a desktop notification for mention and/or dm") + "\n";
+    #endif // USE_DBUS
 
     return strUsage;
 }

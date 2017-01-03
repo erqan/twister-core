@@ -24,11 +24,14 @@ namespace libtorrent {
     class entry;
 }
 
-class twister
+namespace twister
 {
-public:
-    twister();
-};
+    class twister
+    {
+    public:
+        twister();
+    };
+}
 
 void preinitSessionTorrent();
 void startSessionTorrent(boost::thread_group& threadGroup);
