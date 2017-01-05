@@ -28,6 +28,8 @@ Please follow the instructions for your platform:
 - [OS X](https://github.com/miguelfreitas/twister-core/blob/master/doc/build-osx.md)
 - [Windows (untested)](https://github.com/miguelfreitas/twister-core/wiki/Compiling-for-Windows)
 
+- [to build and use with DBUS](https://github.com/erqan/twister-core/blob/twister-dbus/doc/build-n-use-with-dbus.md)
+
 > According to our tests, at least 1GB of RAM is needed to compile Twister.
 
 Alternatively, you can run Twister on an isolated Linux container, using [Docker](https://www.docker.com/). First, [install Docker on your system](https://docs.docker.com/installation/#installation). Then run:

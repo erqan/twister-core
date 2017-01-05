@@ -773,6 +773,7 @@ AM_CONDITIONAL([ENABLE_PYTHON_BINDING], [test "x$ARG_ENABLE_PYTHON_BINDING" = "x
 AM_CONDITIONAL([WITH_SHIPPED_GEOIP], [test "x$ARG_WITH_LIBGEOIP" = "xno" ])
 AM_CONDITIONAL([WITH_OPENSSL], [test "x$ARG_ENABLE_ENCRYPTION" = "xyes" -o "x$ARG_ENABLE_ENCRYPTION" = "xon" ])
 AM_CONDITIONAL([USE_SSE2], [test "x$ARG_ENABLE_SSE2" = "xyes" -o "x$ARG_ENABLE_SSE2" = "xon" ])
+AM_CONDITIONAL([USE_DBUS], [test "x$ARG_ENABLE_DBUS" = "xyes" -o "x$ARG_ENABLE_DBUS" = "xon" ])
 AM_CONDITIONAL([ENABLE_RSS], [test "x$ARG_ENABLE_RSS" = "xyes" -o "x$ARG_ENABLE_RSS" = "xon" ])
 AM_CONDITIONAL([USE_DBUS], [test "x$ARG_ENABLE_DBUS" = "xyes" -o "x$ARG_ENABLE_DBUS" = "xon" ])
 
@@ -877,6 +878,7 @@ Features:
   geoip support:        ${ARG_ENABLE_GEOIP:-yes}
   dht support:          ${ARG_ENABLE_DHT:-yes}
   pool allocators:      ${ARG_ENABLE_POOL_ALLOC:-yes}
+  dbus connectivity:    ${ARG_ENABLE_DBUS:-no}
   rss feed:             ${ARG_ENABLE_RSS:-yes}
   dbus connectivity:    ${ARG_ENABLE_DBUS:-no}
 

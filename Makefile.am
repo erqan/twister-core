@@ -133,6 +133,10 @@ if USE_SSE2
 SSE2_SOURCES = src/scrypt-sse2.cpp
 endif
 
+if USE_DBUS
+DBUS_SOURCES = src/twister-dbus.cpp
+endif
+
 if ENABLE_RSS
 RSS_SOURCES = src/twister_rss.cpp
 endif
@@ -176,6 +180,7 @@ BITCOIN_TWISTER_SOURCES = \
     src/dhtproxy.cpp \
     src/twister.cpp \
     src/twister_utils.cpp \
+    $(DBUS_SOURCES) \
     $(SSE2_SOURCES) \
     $(RSS_SOURCES)
 

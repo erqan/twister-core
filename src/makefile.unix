@@ -38,7 +38,7 @@ LIBS += \
    -l ssl \
    -l crypto \
    -l rt \
-   -l dbus-1
+   `pkg-config --libs dbus-1`
 
 TESTLIBS += \
  -Wl,-B$(LMODE) \
@@ -94,7 +94,7 @@ DEBUGFLAGS=-g
 # CXXFLAGS can be specified on the make command line, so we use xCXXFLAGS that only
 # adds some defaults in front. Unfortunately, CXXFLAGS=... $(CXXFLAGS) does not work.
 xCXXFLAGS=-O2 -pthread -Wall -Wextra -Wformat -Wformat-security -Wno-unused-parameter \
-    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS) -DUSE_DBUS -I/usr/include/dbus-1.0 -I/usr/lib/dbus-1.0/include
+    $(DEBUGFLAGS) $(DEFS) $(HARDENING) $(CXXFLAGS) `pkg-config --cflags dbus-1`
 
 # LDFLAGS can be specified on the make command line, so we use xLDFLAGS that only
 # adds some defaults in front. Unfortunately, LDFLAGS=... $(LDFLAGS) does not work.
@@ -140,6 +140,7 @@ OBJS= \
     obj/chainparams.o \
     obj/dhtproxy.o \
     obj/twister.o \
+    obj/twister-dbus.o \
     obj/twister_rss.o \
     obj/twister_utils.o
 
