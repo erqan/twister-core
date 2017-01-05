@@ -35,6 +35,20 @@
 #include <fstream>
 #include <streambuf>
 
+#include <websocketpp/config/asio_no_tls.hpp>
+#include <websocketpp/config/asio_no_tls_client.hpp>
+#include <websocketpp/client.hpp>
+#include <websocketpp/server.hpp>
+
+typedef websocketpp::server<websocketpp::config::asio> wsserver;
+typedef websocketpp::client<websocketpp::config::asio_client> wsclient;
+
+using websocketpp::lib::placeholders::_1;
+using websocketpp::lib::placeholders::_2;
+using websocketpp::lib::bind;
+
+typedef websocketpp::config::asio_client::message_type::ptr message_ptr;
+
 using namespace std;
 using namespace boost;
 using namespace boost::asio;
@@ -1199,6 +1213,66 @@ Object CallRPC(const string& strMethod, const Array& params)
     string strUserPass64 = EncodeBase64(mapArgs["-rpcuser"] + ":" + mapArgs["-rpcpassword"]);
     map<string, string> mapRequestHeaders;
     mapRequestHeaders["Authorization"] = string("Basic ") + strUserPass64;
+    
+    if (strMethod == "openwebsocket")
+    {
+        wsclient c;
+
+        std::string uri = "ws://localhost:28332";
+
+        try 
+        {
+            // Set logging to be pretty verbose (everything except message payloads)
+            c.set_access_channels(websocketpp::log::alevel::all);
+            c.clear_access_channels(websocketpp::log::alevel::frame_payload);
+
+            // Initialize ASIO
+            c.init_asio();
+
+            // Register our message handler
+            c.set_message_handler(bind([](wsclient* c, websocketpp::connection_hdl hdl, message_ptr msg) {
+                std::cout << "on_message called with hdl: " << hdl.lock().get()
+                          << " and message: " << msg->get_payload()
+                          << std::endl;
+
+
+                websocketpp::lib::error_code ec;
+
+                c->send(hdl, msg->get_payload(), msg->get_opcode(), ec);
+                if (ec) {
+                    std::cout << "Echo failed because: " << ec.message() << std::endl;
+                }
+            },&c,::_1,::_2));
+
+            websocketpp::lib::error_code ec;
+            wsclient::connection_ptr con = c.get_connection(uri, ec);
+            if (ec) {
+                std::cout << "could not create connection because: " << ec.message() << std::endl;
+                return 0;
+            }
+
+            // Note that connect here only requests a connection. No network messages are
+            // exchanged until the event loop starts running in the next line.
+            c.connect(con);
+
+            // Start the ASIO io_service run loop
+            // this will cause a single connection to be made to the server. c.run()
+            // will exit when this connection is closed.
+            c.run();
+        }
+        catch (websocketpp::exception const & e)
+        {
+            std::cout << e.what() << std::endl;
+            
+            const Object& reply;
+            reply.push_back(Pair("error", e.what()));
+            return reply;
+        }
+        
+        const Object& reply;
+        reply.push_back(Pair("result", "OK"));
+        return reply;
+    }
 
     // Send request
     string strRequest = JSONRPCRequest(strMethod, params, 1);
