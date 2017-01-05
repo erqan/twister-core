@@ -7,7 +7,7 @@ Use `--enable-dbus` parameter to build with DBUS support.
 
 For example;
 
-    ./bootstrap.sh --enable-logging --enable-debug --enable-dht
+    ./bootstrap.sh --enable-logging --enable-debug --enable-dht --enable-dbus
 
 then
 
