@@ -105,6 +105,11 @@ typedef enum TW_DBUS_METHODS
     TW_DBUS_M_LEAVEGROUP,
     TW_DBUS_M_GETPIECEAVAILABILITY,
     TW_DBUS_M_GETPIECEMAXSEEN,
+    TW_DBUS_M_PEEKPOST,
+    TW_DBUS_M_USERNAMETOUID,
+    TW_DBUS_M_UIDTOUSERNAME,
+    TW_DBUS_M_NEWSHORTURL,
+    TW_DBUS_M_DECODESHORTURL,
     TW_DBUS_M_CNT
 } TW_DBUS_METHODS;
 
@@ -213,7 +218,12 @@ string tw_dbus_methodes_g[] = {
     "newgroupdescription",
     "leavegroup",
     "getpieceavailability",
-    "getpiecemaxseen"
+    "getpiecemaxseen",
+    "peekpost",
+    "usernametouid",
+    "uidtousername",
+    "newshorturl",
+    "decodeshorturl"
 };
 
 tw_dbus_calls_t tw_dbus_call_permissions_g[] = {
@@ -299,6 +309,11 @@ tw_dbus_calls_t tw_dbus_call_permissions_g[] = {
     {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_LEAVEGROUP],               true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
     {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_GETPIECEAVAILABILITY],     true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
     {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_GETPIECEMAXSEEN],          true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_PEEKPOST],                 true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_USERNAMETOUID],            true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_UIDTOUSERNAME],            true,  {FALSE, FALSE,TRUE,  FALSE, FALSE}},
+    {TW_DBUS_IF_USERS,  tw_dbus_methodes_g[TW_DBUS_M_NEWSHORTURL],              true,  {FALSE, FALSE,FALSE, TRUE,  FALSE}},
+    {TW_DBUS_IF_CORE,   tw_dbus_methodes_g[TW_DBUS_M_DECODESHORTURL],           true,  {FALSE, TRUE, FALSE, FALSE, FALSE}},
 };
 
 map<string, tw_dbus_calls_t *> tw_dbus_call_map_g;
