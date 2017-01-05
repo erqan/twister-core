@@ -888,7 +888,7 @@ namespace libtorrent
 			, std::string const& private_key
 			, std::string const& dh_params
 			, std::string const& passphrase);
-		bool is_ssl_torrent() const { return m_ssl_ctx; } 
+		bool is_ssl_torrent() const { return m_ssl_ctx.get(); } 
 		boost::asio::ssl::context* ssl_ctx() const { return m_ssl_ctx.get(); } 
 #endif
 
@@ -1406,6 +1406,9 @@ namespace libtorrent
 		// set to false until we've loaded resume data
 		bool m_resume_data_loaded;
 #endif
+	public:
+		// PEEK extension with hashcash
+		int m_peek_single_piece;
 	};
 }
 

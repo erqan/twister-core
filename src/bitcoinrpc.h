@@ -49,6 +49,8 @@ enum RPCErrorCode
     RPC_DATABASE_ERROR              = -20, // Database error
     RPC_DESERIALIZATION_ERROR       = -22, // Error parsing or validating structure in raw format
     RPC_FORBIDDEN_ON_PUBLIC_SERVER  = -23, // public server mode is activated, this method is not allowed
+    RPC_TIMEOUT                     = -24, // timeout on resource retrieval
+    RPC_RESOURCE_BUSY_TRY_AGAIN     = -25, // Resource is currently busy, try again later
 
     // P2P client errors
     RPC_CLIENT_NOT_CONNECTED        = -9,  // Bitcoin is not connected
@@ -202,6 +204,7 @@ extern json_spirit::Value dhtput(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dhtputraw(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value dhtget(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value newpostmsg(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value newpostcustom(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value newpostraw(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value newdirectmsg(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value newrtmsg(const json_spirit::Array& params, bool fHelp);
@@ -234,5 +237,10 @@ extern json_spirit::Value newgroupdescription(const json_spirit::Array& params, 
 extern json_spirit::Value leavegroup(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getpieceavailability(const json_spirit::Array& params, bool fHelp);
 extern json_spirit::Value getpiecemaxseen(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value peekpost(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value uidtousername(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value usernametouid(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value newshorturl(const json_spirit::Array& params, bool fHelp);
+extern json_spirit::Value decodeshorturl(const json_spirit::Array& params, bool fHelp);
 
 #endif

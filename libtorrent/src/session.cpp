@@ -1096,12 +1096,12 @@ namespace libtorrent
 	}
 #endif // TORRENT_NO_DEPRECATE
 
-	void session::set_alert_dispatch(boost::function<void(std::auto_ptr<alert>)> const& fun)
+	void session::set_alert_dispatch(boost::function<void(std::unique_ptr<alert> const&)> const& fun)
 	{
 		TORRENT_ASYNC_CALL1(set_alert_dispatch, fun);
 	}
 
-	std::auto_ptr<alert> session::pop_alert()
+	std::unique_ptr<alert> session::pop_alert()
 	{
 		return m_impl->pop_alert();
 	}
@@ -1342,7 +1342,7 @@ namespace libtorrent
 		, utp_min_timeout(500) // milliseconds
 		, utp_syn_resends(2)
 		, utp_fin_resends(2)
-		, utp_num_resends(6)
+		, utp_num_resends(3)
 		, utp_connect_timeout(3000) // milliseconds
 #ifndef TORRENT_NO_DEPRECATE
 		, utp_delayed_ack(0) // milliseconds

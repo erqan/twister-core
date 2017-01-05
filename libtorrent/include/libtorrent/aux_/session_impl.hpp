@@ -105,6 +105,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <mach/mach_host.h>
 #endif
 
+#define HASHCASH_MIN_NBITS 16  // 16 bits ~ 10 ms @ i7 3.50GHz
+#define HASHCASH_MAX_NBITS 31
+
 namespace libtorrent
 {
 
@@ -377,9 +380,9 @@ namespace libtorrent
 
 			void set_alert_mask(boost::uint32_t m);
 			size_t set_alert_queue_size_limit(size_t queue_size_limit_);
-			std::auto_ptr<alert> pop_alert();
+			std::unique_ptr<alert> pop_alert();
 			void pop_alerts(std::deque<alert*>* alerts);
-			void set_alert_dispatch(boost::function<void(std::auto_ptr<alert>)> const&);
+			void set_alert_dispatch(boost::function<void(std::unique_ptr<alert> const&)> const&);
 			void post_alert(const alert& alert_);
 
 			alert const* wait_for_alert(time_duration max_wait);
@@ -445,7 +448,7 @@ namespace libtorrent
 #endif // TORRENT_NO_DEPRECATE
 
 #ifndef TORRENT_DISABLE_DHT
-			bool is_dht_running() const { return m_dht; }
+			bool is_dht_running() const { return m_dht.get(); }
 #endif
 
 #if TORRENT_USE_I2P
@@ -1143,6 +1146,10 @@ namespace libtorrent
 			// the number of torrents that have apply_ip_filter
 			// set to false. This is typically 0
 			int m_non_filtered_torrents;
+			
+			// hashcash PEEK
+			int m_hashcash_nbits;
+			int m_hashcash_reqs;
 
 #if defined TORRENT_VERBOSE_LOGGING || defined TORRENT_LOGGING || defined TORRENT_ERROR_LOGGING
 			boost::shared_ptr<logger> create_log(std::string const& name

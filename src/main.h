@@ -96,7 +96,9 @@ extern bool fHaveGUI;
 // Settings
 extern int64 nTransactionFee;
 
-extern string strSpamMessage;
+extern CCriticalSection cs_spamMessages;
+static const string strSpamMessage = "Promoted posts are needed to run the network infrastructure. If you want to help, start generating blocks and advertise. [en]";
+extern std::list<string> spamMessages;
 extern string strSpamUser;
 
 // Minimum disk space required - used in CheckDiskSpace()
@@ -266,6 +268,10 @@ inline bool AllowFree(double dPriority)
 }
 
 bool CheckUsername(const std::string &userName, CValidationState &state);
+
+bool TxNumToUsername(unsigned int txNum, string &username);
+
+bool UsernameToTxNum(const string &username, int *txNum, bool last = true);
 
 bool DoTxProofOfWork(CTransaction& tx);
 

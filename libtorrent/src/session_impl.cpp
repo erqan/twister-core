@@ -681,6 +681,8 @@ namespace aux {
 		, m_need_auto_manage(false)
 #if (defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS) && defined BOOST_HAS_PTHREADS
 		, m_network_thread(0)
+		, m_hashcash_nbits(HASHCASH_MIN_NBITS)
+		, m_hashcash_reqs(0)
 #endif
 	{
 #if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
@@ -3563,6 +3565,17 @@ retry:
 			}
 		}
 
+		// --------------------------------------------------------------
+		// adjust hashcash: too much reqs last second => increase difficulty
+		// --------------------------------------------------------------
+		if (m_hashcash_reqs > 50) {
+			m_hashcash_nbits = std::min(m_hashcash_nbits+1, HASHCASH_MAX_NBITS);
+		}
+		if (!m_hashcash_reqs && (random() % 100) == 0 ) {
+			m_hashcash_nbits = std::max(m_hashcash_nbits-1, HASHCASH_MIN_NBITS);
+		}
+		m_hashcash_reqs = 0;
+
 		while (m_tick_residual >= 1000) m_tick_residual -= 1000;
 //		m_peer_pool.release_memory();
 	}
@@ -5024,7 +5037,7 @@ retry:
 
 		TORRENT_ASSERT(is_network_thread());
 
-		std::auto_ptr<state_update_alert> alert(new state_update_alert());
+		std::unique_ptr<state_update_alert> alert(new state_update_alert());
 		alert->status.reserve(m_state_updates.size());
 
 #if defined TORRENT_DEBUG || TORRENT_RELEASE_ASSERTS
@@ -6144,12 +6157,12 @@ retry:
 		}
 	}
 
-	void session_impl::set_alert_dispatch(boost::function<void(std::auto_ptr<alert>)> const& fun)
+	void session_impl::set_alert_dispatch(boost::function<void(std::unique_ptr<alert> const&)> const& fun)
 	{
 		m_alerts.set_dispatch_function(fun);
 	}
 
-	std::auto_ptr<alert> session_impl::pop_alert()
+	std::unique_ptr<alert> session_impl::pop_alert()
 	{
 		return m_alerts.get();
 	}
