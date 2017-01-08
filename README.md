@@ -1,3 +1,7 @@
+**THIS REPOSITORY CONTAINS EXPERIMENTAL CODES**
+
+*Consider to use more stable orijinal one [from official repo.](https://github.com/miguelfreitas/twister-core)*
+
 # twister - p2p microblogging
 
 <http://www.twister.net.co>
