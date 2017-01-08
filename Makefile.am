@@ -196,6 +196,7 @@ twisterd_LDADD = $(LIBLEVELDB) $(LIBMEMENV) \
 
 AM_CPPFLAGS = -ftemplate-depth-100 -DBOOST_SPIRIT_THREADSAFE -D_FILE_OFFSET_BITS=64 \
     -I$(top_srcdir)/libtorrent/include \
+	-I$(top_srcdir)/websocketpp \
     -I$(top_srcdir)/src \
     -I$(top_srcdir)/src/leveldb/include -I$(top_srcdir)/src/leveldb/helpers \
     $(if $(filter "$(GCC_MAJOR_VER)","4"), "-std=c++0x", $(if $(filter "$(GCC_MAJOR_VER)","5"), "-std=c++11", "-std=c++14")) \

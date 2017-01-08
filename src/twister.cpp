@@ -1449,6 +1449,23 @@ bool processReceivedDM(lazy_entry const* post)
                         }
 #endif // USE_DBUS
                     }
+
+                    if (GetBoolArg("-websocket", false) && !fromMe)
+                    {
+                        Object dm;
+
+                        dm.push_back(Pair("type", isGroup ? "GROUP" : "DM"));
+                        if (isGroup)
+                            dm.push_back(Pair("group", item.second.username));
+                        dm.push_back(Pair("k", k));
+                        dm.push_back(Pair("time", utcTime));
+                        dm.push_back(Pair("from", from));
+                        dm.push_back(Pair("to", to));
+                        dm.push_back(Pair("msg", msg));
+
+                        WriteToWS(dm);
+                    }
+
                     break;
                 }
             }
@@ -1483,9 +1500,11 @@ void processReceivedPost(lazy_entry const &v, std::string &username, int64 time,
 
             LOCK(cs_twister);
             // mention of a local user && sent by someone we follow
-            if( m_users.count(mentionUser) && m_users[mentionUser].m_following.count(username) ) {
+            if( m_users.count(mentionUser) && m_users[mentionUser].m_following.count(username) )
+            {
                 std::string postKey = username + ";" + boost::lexical_cast<std::string>(time);
-                if( m_users[mentionUser].m_mentionsKeys.count(postKey) == 0 ) {
+                if( m_users[mentionUser].m_mentionsKeys.count(postKey) == 0 )
+                {
                     m_users[mentionUser].m_mentionsKeys.insert(postKey);
                     entry vEntry;
                     vEntry = v;
@@ -1501,7 +1520,43 @@ void processReceivedPost(lazy_entry const &v, std::string &username, int64 time,
                         twister::utils::notification(title, body);
                     }
                     #endif // USE_DBUS
+
+                    if (GetBoolArg("-websocket", false))
+                    {
+                        Object obj;
+
+                        obj.push_back(Pair("type", "mention"));
+                        obj.push_back(Pair("from", username));
+                        obj.push_back(Pair("to", mentionUser));
+                        hexcapePost(vEntry);
+                        obj.push_back(Pair("post", entryToJson(vEntry)));
+
+                        WriteToWS(obj);
+                    }
                 }
+            }
+        }
+    }
+
+    if (GetBoolArg("-websocket", false))
+    {
+        entry vEntry;
+        vEntry = v;
+        for (map<string, UserData>::const_iterator it = m_users.begin();
+             it != m_users.end();
+             ++it)
+        {
+            if (it->second.m_following.count(username))
+            {
+                Object obj;
+
+                obj.push_back(Pair("type", "post"));
+                obj.push_back(Pair("postboard", it->first));
+                obj.push_back(Pair("from", username));
+                hexcapePost(vEntry);
+                obj.push_back(Pair("post", entryToJson(vEntry)));
+
+                WriteToWS(obj);
             }
         }
     }
